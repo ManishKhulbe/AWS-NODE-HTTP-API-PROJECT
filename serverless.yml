@@ -1,0 +1,58 @@
+service: aws-node-http-api-project
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+          Resource: "arn:aws:dynamodb:us-east-1:728537042988:table/UserTable"
+
+
+functions:
+  addUser:
+    handler: src/addUser.handler
+    events:
+      - httpApi:
+          path: /
+          method: post
+  fetchUser:
+    handler: src/fetchUser.handler
+    events:
+      - httpApi:
+          path: /users
+          method: get
+  fetchSingleUser:
+    handler: src/fetchSingleUser.handler
+    events:
+      - httpApi:
+          path: /users/{id}
+          method: get
+  updateUser:
+    handler: src/updateUser.handler
+    events:
+      - httpApi:
+          path: /users/{id}
+          method: put
+
+
+          
+resources:
+  Resources:
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UserTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
